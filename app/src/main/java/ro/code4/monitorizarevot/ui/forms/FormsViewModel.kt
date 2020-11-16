@@ -10,6 +10,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import retrofit2.HttpException
 import ro.code4.monitorizarevot.adapters.helper.AddNoteListItem
 import ro.code4.monitorizarevot.adapters.helper.FormListItem
 import ro.code4.monitorizarevot.adapters.helper.ListItem
@@ -24,6 +25,7 @@ import ro.code4.monitorizarevot.ui.base.BaseFormViewModel
 
 class FormsViewModel : BaseFormViewModel() {
     private val formsLiveData = MutableLiveData<ArrayList<ListItem>>()
+    private val formsLoadErrorsLiveData = MutableLiveData<Int>()
     private val selectedFormLiveData = MutableLiveData<FormDetails>()
     private val selectedQuestionLiveData = MutableLiveData<Pair<FormDetails, Question>>()
     private val syncVisibilityLiveData = MediatorLiveData<Int>()
@@ -68,6 +70,7 @@ class FormsViewModel : BaseFormViewModel() {
     }
 
     fun forms(): LiveData<ArrayList<ListItem>> = formsLiveData
+    fun formsLoadErrors(): LiveData<Int> = formsLoadErrorsLiveData
 
     fun selectedForm(): LiveData<FormDetails> = selectedFormLiveData
     fun selectedQuestion(): LiveData<Pair<FormDetails, Question>> = selectedQuestionLiveData
@@ -98,8 +101,12 @@ class FormsViewModel : BaseFormViewModel() {
             repository.getForms()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({}, {
-                    onError(it)
+                .subscribe({}, {exception ->
+                    if (exception is HttpException && exception.code() == 401) {
+                        formsLoadErrorsLiveData.postValue(exception.code())
+                    } else {
+                        onError(exception)
+                    }
                 })
         )
 

@@ -9,8 +9,8 @@ import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_polling_station_selection.*
 import org.koin.android.viewmodel.ext.android.getSharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
+import retrofit2.HttpException
 import ro.code4.monitorizarevot.R
-import ro.code4.monitorizarevot.ui.base.BaseAnalyticsFragment
 import ro.code4.monitorizarevot.ui.base.ViewModelFragment
 import ro.code4.monitorizarevot.ui.section.PollingStationViewModel
 import ro.code4.monitorizarevot.widget.ProgressDialogFragment
@@ -60,9 +60,13 @@ class PollingStationSelectionFragment : ViewModelFragment<PollingStationSelectio
                     progressDialog.dismiss()
                     counties?.run(::setCountiesDropdown)
                 },
-                onFailure = {
+                onFailure = {exception ->
                     progressDialog.dismiss()
                     // TODO: Show some message for the user know what happened
+
+                    if (exception is HttpException && exception.code() == 401) {
+                        handleAuthenticationError()
+                    }
                 },
                 onLoading = {
                     activity?.run {

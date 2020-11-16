@@ -18,7 +18,6 @@ import ro.code4.monitorizarevot.analytics.ParamKey
 import ro.code4.monitorizarevot.helper.isOnline
 import ro.code4.monitorizarevot.ui.base.ViewModelFragment
 
-
 class FormsListFragment : ViewModelFragment<FormsViewModel>() {
 
     companion object {
@@ -49,6 +48,11 @@ class FormsListFragment : ViewModelFragment<FormsViewModel>() {
         viewModel.forms().observe(this, Observer {
             formAdapter.items = it
         })
+
+        viewModel.formsLoadErrors().observe(this, Observer {
+            handleAuthenticationError()
+        })
+
         viewModel.syncVisibility().observe(this, Observer {
             syncGroup.visibility = it
         })

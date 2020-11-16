@@ -50,6 +50,14 @@ fun SharedPreferences.isPollingStationConfigCompleted() =
 fun SharedPreferences.completedPollingStationConfig(value: Boolean = true) =
     putBoolean(POLLING_STATION_CONFIG_COMPLETED, value)
 
+fun SharedPreferences.clearUserPrefs() = run {
+    completedPollingStationConfig(false)
+    val editor = edit()
+    editor.remove(PREFS_COUNTY_CODE)
+    editor.remove(PREFS_POLLING_STATION_NUMBER)
+    editor.apply()
+    deleteToken()
+}
 
 fun SharedPreferences.hasCompletedOnboarding() = getBoolean(ONBOARDING_COMPLETED, false)
 fun SharedPreferences.completedOnboarding() = putBoolean(ONBOARDING_COMPLETED)
